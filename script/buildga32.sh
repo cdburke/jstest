@@ -2,6 +2,10 @@
 #
 # build linux32 on github actions
 
+ls -al
+
+exit 0
+
 ext="so"
 
 cp -R jlibrary/* .
