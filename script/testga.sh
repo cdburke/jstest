@@ -30,7 +30,3 @@ j$B/jconsole -lib libjavx.$ext testga.ijs
 if [ $1 == "linux" ]; then
   j$B/jconsole -lib libjavx2.$ext testga.ijs
 fi
-
-if [ $B == 32 ]; then
-  mv testlinux.txt testlinux32.txt
-fi
