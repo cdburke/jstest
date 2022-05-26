@@ -3,8 +3,7 @@
 # build linux32 on github actions
 
 ls -al
-
-exit 0
+ls -al jlibrary
 
 ext="so"
 
