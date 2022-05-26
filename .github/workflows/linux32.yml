@@ -90,4 +90,4 @@ jobs:
      env:
       webhook_url: ${{ secrets.WEBHOOK_URL }}
       webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
-      data: '{ "id": "jebuild" }'
+      data: '{ "id": "jebuild32" }'
