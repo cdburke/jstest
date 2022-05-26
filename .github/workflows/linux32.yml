@@ -1,0 +1,93 @@
+name: JE
+
+on:
+ push:
+  branches:
+   - '**'
+
+jobs:
+ jengine:
+  name: JE
+  runs-on: ${{ matrix.os }}
+
+  strategy:
+   matrix:
+    os: [ubuntu-18.04]
+
+  steps:
+   - name: Checkout Git repository
+     uses: actions/checkout@v2
+
+   - name: Setup Environment (Linux)
+     if: matrix.os == 'ubuntu-18.04'
+     run: |
+      sudo apt-get install -y libedit-dev libncursesw5-dev
+
+   - name: Build JE (Linux)
+     if: matrix.os == 'ubuntu-18.04'
+     env:
+      CC: clang
+      USE_SLEEF: 1
+     run: script/buildga32.sh linux
+
+   - name: Test JE (Linux)
+     if: matrix.os == 'ubuntu-18.04'
+     run: script/testga.sh linux 32
+
+   - name: Compress Files (Linux)
+     if: matrix.os == 'ubuntu-18.04'
+     run: zip -r l32.zip j32
+
+   - name: Release JE (Linux)
+     if: matrix.os == 'ubuntu-18.04'
+     uses: ncipollo/release-action@v1
+     with:
+      tag: build
+      artifacts: "l32.zip"
+      token: ${{ secrets.GITHUB_TOKEN }}
+      allowUpdates: true
+      replacesArtifacts: true
+
+   - name: Copy Test (Linux)
+     if: matrix.os == 'ubuntu-18.04'
+     uses: actions/upload-artifact@v2
+     with:
+       name: dist
+       path: testlinux32.txt
+
+ tests:
+  name: Test Results
+  runs-on: ubuntu-18.04
+  needs: jengine
+  steps:
+   - name: Checkout Git repository
+     uses: actions/checkout@v2
+
+   - name: Get Test Results
+     uses: actions/download-artifact@v2
+     with:
+       name: dist
+
+   - name: Merge Test Results
+     run: script/testgares.sh
+
+   - name: Copy Tests to Build
+     uses: ncipollo/release-action@v1
+     with:
+      tag: build
+      artifacts: "tests.txt"
+      token: ${{ secrets.GITHUB_TOKEN }}
+      allowUpdates: true
+      replacesArtifacts: true
+
+ webhook:
+  name: Run Webhook
+  runs-on: ubuntu-18.04
+  needs: tests
+  steps:
+   - name: update server
+     uses: distributhor/workflow-webhook@v2
+     env:
+      webhook_url: ${{ secrets.WEBHOOK_URL }}
+      webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
+      data: '{ "id": "jebuild" }'
